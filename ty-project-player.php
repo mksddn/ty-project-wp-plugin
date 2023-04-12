@@ -17,7 +17,7 @@
  */
 
 if (!defined('ABSPATH')) {
-	die;
+  die;
 }
 
 /**
@@ -29,9 +29,16 @@ if (!defined('ABSPATH')) {
  */
 function typroject_ty_project_player_block_init()
 {
-	register_block_type(__DIR__ . '/build');
+  register_block_type(__DIR__ . '/build');
 }
 add_action('init', 'typroject_ty_project_player_block_init');
+
+
+function add_main_typp_script()
+{
+  wp_enqueue_script('main_typp_script', 'https://ty.mailstone.net/widget/player.js');
+}
+add_action('wp_enqueue_scripts', 'add_main_typp_script');
 
 
 function add_settings_page()

@@ -73,12 +73,12 @@ export default function Edit({ attributes, setAttributes }) {
 
 	playersOptions = [
 		{
-			label: "player name 1",
-			value: "player id 1",
+			label: "Static Player 1",
+			value: "9f60ac6c-7b75-42f0-8bb7-ab6b51ec0a9b",
 		},
 		{
-			label: "player name 2",
-			value: "player id 2",
+			label: "Dynamic player 1",
+			value: "09394f9f-e1e8-4029-a5d8-f131b726f95e",
 		},
 	];
 
