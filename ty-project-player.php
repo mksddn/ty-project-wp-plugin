@@ -55,7 +55,7 @@ function add_settings_page()
 add_action('admin_menu', 'add_settings_page', 25);
 
 
-function set_settings()
+function add_settings()
 {
   $typp_user_email = 'typp_user_email';
   $typp_user_password = 'typp_user_password';
@@ -64,14 +64,25 @@ function set_settings()
   register_setting('typp_settings', $typp_user_password);
   register_setting('typp_settings', 'typp_token', array('show_in_rest' => true));
   register_setting('typp_settings', 'typp_refresh_token');
-  register_setting('typp_settings', 'typp_players');
+  register_setting('typp_settings', 'typp_players', array(
+    'type' => 'array',
+    'show_in_rest' => array(
+      'schema' => array(
+        'items' => array(
+          // 'type' => 'object',
+          'value'    => 'string',
+          'label' => 'string',
+        ),
+      ),
+    ),
+  ));
 
   add_settings_section('typp_settings_section', 'Use your credentials to log in to the TY Project', '', 'typp');
 
   add_settings_field(
     $typp_user_email,
     'Email',
-    'set_email',
+    'add_email_field',
     'typp',
     'typp_settings_section',
     array(
@@ -82,7 +93,7 @@ function set_settings()
   add_settings_field(
     $typp_user_password,
     'Password',
-    'set_password',
+    'add_password_field',
     'typp',
     'typp_settings_section',
     array(
@@ -91,9 +102,9 @@ function set_settings()
     )
   );
 }
-add_action('admin_init', 'set_settings');
+add_action('admin_init', 'add_settings');
 
-function set_email($args)
+function add_email_field($args)
 {
   $value = get_option($args['name']);
   printf(
@@ -103,7 +114,7 @@ function set_email($args)
     strval($value)
   );
 }
-function set_password($args)
+function add_password_field($args)
 {
   $value = get_option($args['name']);
   printf(
@@ -122,7 +133,9 @@ function show_settings_form()
   // echo '<br>';
   // echo get_option('typp_refresh_token');
   // echo '<br>';
-  // echo get_option('typp_players');
+  // echo '<pre>';
+  // print_r(get_option('typp_players'));
+  // echo '</pre>';
 
   typp_auth(get_option('typp_user_email'), get_option('typp_user_password'));
 
@@ -147,6 +160,16 @@ function typp_auth($email, $password)
     'body'    => array('email' =>  $email, 'password' => $password),
   ));
 
+  if ($response['response']['code'] == '200') {
+    update_option('typp_token', wp_remote_retrieve_headers($response)['access-token']);
+    update_option('typp_refresh_token', wp_remote_retrieve_headers($response)['refresh-token']);
+    echo '<div class="notice notice-success is-dismissible"><p>You are authorized</p></div>';
+    fetch_players();
+  } else {
+    $responceData = (!is_wp_error($response)) ? json_decode(wp_remote_retrieve_body($response), true) : null;
+    echo '<div class="notice notice-error is-dismissible"><p>' . $responceData['message'] . '</p></div>';
+  }
+
   // echo '<br><b>wp_remote_retrieve_body: </b><br><pre>';
   // print_r(json_decode(wp_remote_retrieve_body($response)));
   // echo '</pre>';
@@ -166,18 +189,21 @@ function typp_auth($email, $password)
   // echo '<br><b>wp_remote_retrieve_response_message: </b>';
   // print_r(wp_remote_retrieve_response_message($response));
 
-  // $players = wp_remote_get('https://ty.mailstone.net/api/players', array(
-  //   'headers' => array('Authorization' => get_option('typp_token')),
-  // ));
-  // print_r(json_decode(wp_remote_retrieve_body($players)));
-  // update_option('typp_players', wp_remote_retrieve_body($players));
+}
 
-  if ($response['response']['code'] == '200') {
-    update_option('typp_token', wp_remote_retrieve_headers($response)['access-token']);
-    update_option('typp_refresh_token', wp_remote_retrieve_headers($response)['refresh-token']);
-    echo '<div class="notice notice-success is-dismissible"><p>You are authorized</p></div>';
-  } else {
-    $responceData = (!is_wp_error($response)) ? json_decode(wp_remote_retrieve_body($response), true) : null;
-    echo '<div class="notice notice-error is-dismissible"><p>' . $responceData['message'] . '</p></div>';
+
+function fetch_players()
+{
+  $players = wp_remote_get('https://ty.mailstone.net/api/players', array(
+    'headers' => array('Authorization' => get_option('typp_token')),
+  ));
+  $players = json_decode(wp_remote_retrieve_body($players, true));
+  $playersFiltered = [];
+  foreach ($players as $item) {
+    $playersFiltered[] = ["value" => $item->id, "label" => $item->name, "playerType" => $item->type];
   }
+  update_option('typp_players', $playersFiltered);
+  // echo '<pre>';
+  // print_r(get_option('typp_players'));
+  // echo '</pre>';
 }
