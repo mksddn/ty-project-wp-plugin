@@ -40,6 +40,13 @@ function add_main_typp_script()
 }
 add_action('wp_enqueue_scripts', 'add_main_typp_script');
 
+add_filter( 'plugin_action_links_' . plugin_basename(__FILE__), 'apd_settings_link' );
+function apd_settings_link( array $links ) {
+    $url = get_admin_url() . "options-general.php?page=typp";
+    $settings_link = '<a href="' . $url . '">' . __('Settings', 'textdomain') . '</a>';
+      $links[] = $settings_link;
+    return $links;
+  }
 
 function add_settings_page()
 {
@@ -64,18 +71,18 @@ function add_settings()
   register_setting('typp_settings', $typp_user_password);
   register_setting('typp_settings', 'typp_token', array('show_in_rest' => true));
   register_setting('typp_settings', 'typp_refresh_token');
-  register_setting('typp_settings', 'typp_players', array(
-    'type' => 'array',
-    'show_in_rest' => array(
-      'schema' => array(
-        'items' => array(
-          // 'type' => 'object',
-          'value'    => 'string',
-          'label' => 'string',
-        ),
-      ),
-    ),
-  ));
+  // register_setting('typp_settings', 'typp_players', array(
+  //   'type' => 'array',
+  //   'show_in_rest' => array(
+  //     'schema' => array(
+  //       'items' => array(
+  //         // 'type' => 'object',
+  //         'value'    => 'string',
+  //         'label' => 'string',
+  //       ),
+  //     ),
+  //   ),
+  // ));
 
   add_settings_section('typp_settings_section', 'Use your credentials to log in to the TY Project', '', 'typp');
 
@@ -164,10 +171,11 @@ function typp_auth($email, $password)
     update_option('typp_token', wp_remote_retrieve_headers($response)['access-token']);
     update_option('typp_refresh_token', wp_remote_retrieve_headers($response)['refresh-token']);
     echo '<div class="notice notice-success is-dismissible"><p>You are authorized</p></div>';
-    fetch_players();
+    // fetch_players();
   } else {
     $responceData = (!is_wp_error($response)) ? json_decode(wp_remote_retrieve_body($response), true) : null;
-    echo '<div class="notice notice-error is-dismissible"><p>' . $responceData['message'] . '</p></div>';
+    echo '<div class="notice notice-error is-dismissible"><p>' . $responceData['message'] . '</p>
+    <p>You can change your password on <a href="https://ty.mailstone.net/" target="_blank">TY Project Page</a></p></div>';
   }
 
   // echo '<br><b>wp_remote_retrieve_body: </b><br><pre>';
@@ -192,18 +200,18 @@ function typp_auth($email, $password)
 }
 
 
-function fetch_players()
-{
-  $players = wp_remote_get('https://ty.mailstone.net/api/players', array(
-    'headers' => array('Authorization' => get_option('typp_token')),
-  ));
-  $players = json_decode(wp_remote_retrieve_body($players, true));
-  $playersFiltered = [];
-  foreach ($players as $item) {
-    $playersFiltered[] = ["value" => $item->id, "label" => $item->name, "playerType" => $item->type];
-  }
-  update_option('typp_players', $playersFiltered);
-  // echo '<pre>';
-  // print_r(get_option('typp_players'));
-  // echo '</pre>';
-}
+// function fetch_players()
+// {
+//   $players = wp_remote_get('https://ty.mailstone.net/api/players', array(
+//     'headers' => array('Authorization' => get_option('typp_token')),
+//   ));
+//   $players = json_decode(wp_remote_retrieve_body($players, true));
+//   $playersFiltered = [];
+//   foreach ($players as $item) {
+//     $playersFiltered[] = ["value" => $item->id, "label" => $item->name, "playerType" => $item->type];
+//   }
+//   update_option('typp_players', $playersFiltered);
+//   // echo '<pre>';
+//   // print_r(get_option('typp_players'));
+//   // echo '</pre>';
+// }

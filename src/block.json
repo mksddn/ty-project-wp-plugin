@@ -9,7 +9,8 @@
 	"description": "Gutenberg Editor Block for TY Project",
 	"supports": {
 		"align": true,
-		"html": false
+		"html": false,
+		"multiple": false
 	},
 	"attributes": {
 		"playerID": {
