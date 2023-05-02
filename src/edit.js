@@ -88,7 +88,7 @@ export default function Edit({ attributes, setAttributes }) {
 					{!playersOptions && "Loading"}
 					{playersOptions && playersOptions.length === 0 && (
 						<p>
-							<b>You're not authorized!</b>
+							<b style={{ color: "#d63638" }}>You're not authorized!</b>
 						</p>
 					)}
 					{playersOptions && playersOptions.length > 0 && (
@@ -112,16 +112,13 @@ export default function Edit({ attributes, setAttributes }) {
 					/>
 				</PanelBody>
 			</InspectorControls>
-			{__("TY Project Player – hello from the editor!", "ty-project-player")}
-			<br />
-			<span onClick={getPlayers}>
-				Player ID: <b>{attributes.playerID}</b>
-			</span>
-			<script
-				type="text/javascript"
-				src="https://ty.mailstone.net/widget/player.js"
-			></script>
-			<script defer>Widget.init("{playerID}")</script>
+			<div onClick={getPlayers}>
+				{__("TY Project Player – hello from the editor!", "ty-project-player")}
+				<br />
+				<span>
+					Player ID: <b>{attributes.playerID}</b>
+				</span>
+			</div>
 		</div>
 	);
 }

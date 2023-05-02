@@ -5,5 +5,8 @@
  */
 
 .wp-block-typroject-ty-project-player {
-	border: 1px dotted #f00;
+	padding: 0;
+}
+.wp-block-typroject-ty-project-player>div {
+	padding: 20px;
 }

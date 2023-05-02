@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Plugin Name:       TY Project Player
+ * Plugin Name:       TY Project Player 1
  * Plugin URI:        https://plugin-url.net
  * Description:       Gutenberg Editor Block for TY Project
- * Requires at least: 6.1
+ * Requires at least: 5.9
  * Requires PHP:      7.0
  * Version:           0.1.0
  * Author:            Afterlogic
@@ -39,14 +39,16 @@ function add_main_typp_script()
   wp_enqueue_script('main_typp_script', 'https://ty.mailstone.net/widget/player.js');
 }
 add_action('wp_enqueue_scripts', 'add_main_typp_script');
+add_action('admin_enqueue_scripts', 'add_main_typp_script');
 
-add_filter( 'plugin_action_links_' . plugin_basename(__FILE__), 'apd_settings_link' );
-function apd_settings_link( array $links ) {
-    $url = get_admin_url() . "options-general.php?page=typp";
-    $settings_link = '<a href="' . $url . '">' . __('Settings', 'textdomain') . '</a>';
-      $links[] = $settings_link;
-    return $links;
-  }
+add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'apd_settings_link');
+function apd_settings_link(array $links)
+{
+  $url = get_admin_url() . "options-general.php?page=typp";
+  $settings_link = '<a href="' . $url . '">' . __('Settings', 'textdomain') . '</a>';
+  $links[] = $settings_link;
+  return $links;
+}
 
 function add_settings_page()
 {
@@ -144,7 +146,9 @@ function show_settings_form()
   // print_r(get_option('typp_players'));
   // echo '</pre>';
 
-  typp_auth(get_option('typp_user_email'), get_option('typp_user_password'));
+  if (get_option('typp_user_email') && get_option('typp_user_password')) {
+    typp_auth(get_option('typp_user_email'), get_option('typp_user_password'));
+  }
 
   echo '<div class="wrap">
 			<h1>' . get_admin_page_title() . '</h1>
